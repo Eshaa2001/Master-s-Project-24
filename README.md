@@ -1,8 +1,9 @@
 # Master-s-Project-24
 
-Initial Idea -  Building a Business Operations Assistant driven by AI.
+**Initial Idea:**  
+Building a Business Operations Assistant driven by AI.
 
-Approach:
+**Approach:**
 Constructing a Retrieval Augmented Generation (RAG) pipeline integrated or powered with LLM to create an interface wherein the end user can ask business-operations related queries and get answers with relevant contextual information and supporting visualizations for data distributions. Python offers a rich set of libraries including matplotlib, seaborn, plotly which can be utilized for the sake of creating visualizations on queries by user.
 Instead of relying solely on the LLM to generate responses, the system will retrieve the most relevant information from a pre-defined set of business documents, and the LLM will generate a contextually accurate response.The system will convert the query into a vector and search a pre-processed database of business documents including case studies, business reports, QAs from various data sources using a vector search.These retrieved documents will be passed as context to the GPT model.
 GPT will process both the user query and the retrieved business documents to generate a response. 
@@ -12,6 +13,56 @@ Coming onto the step of augmentation, the system will retrieve and rank relevant
 Right from feeding documents into the LLM to delivering response to the user, it's going to involve several intermediate steps. Let's assume, once the most relevant documents are retrieved from the database, they will be passed to the LLM (e.g., GPT-4). The system will ensure that these documents provide the necessary context for the LLM to generate an informed response. The LLM will then process the user's query in conjunction with the retrieved documents. It will analyze both the query and the contextual information to better understand the user's needs and the specific domain knowledge required to formulate a relevant answer.Based on the retrieved documents and the user query, the LLM will generate an accurate and contextually enriched answer. The response will be tailored to the query, providing a coherent and comprehensive output that draws directly from the most relevant business operations documents. After processing, it will generate a final response that will be delivered to the user. This answer will be both precise and contextually tailored, offering the user a well-rounded, accurate response to their business-related inquiry.
 The entire bot once ready can be hosted on streamlit so that users can have a clickable local host web url to access the interface.
 
-Data Source:
+**Data Source:**
+Historical Data in .csv files related to Business Operations, Finanace, Supply-chain, Marketing
+
+https://www.kaggle.com/datasets/danish1212/business-operations
+https://www.kaggle.com/datasets/adhoppin/financial-data
+https://www.kaggle.com/datasets/nitindatta/finance-data
+https://www.kaggle.com/datasets/dorothyjoel/us-regional-sales
+https://www.kaggle.com/datasets/bytadit/ecommerce-order-dataset
+https://www.kaggle.com/datasets/sahilnbajaj/marketing-campaigns-data-set
+https://www.kaggle.com/datasets/fahmidachowdhury/customer-segmentation-data-for-marketing-analysis
+
+Such datasets will be useful to extract trends in financial operations, business and marketing strategies. To analyze how companies respond to economic shifts and have revised their marketing strategies accordingly.
+
+**FAQs Data**
+https://quant.stackexchange.com/
+https://economics.stackexchange.com/
+https://or.stackexchange.com/
+https://quant.meta.stackexchange.com/
+These websites are rich sources of FAQs related to business, operations research, finance. We can generate XML files for these which can then be parsed 
+Here are some other data sources on "What do the bid trends say each Fiscal Year from 2016-20", they can be downloaded in .csv format as well.
+https://catalog.data.gov/dataset/fy16-bid-trends-report-data
+https://catalog.data.gov/dataset/fy18-bid-trends-report-data
+https://catalog.data.gov/dataset/fy19-bid-trends-report-data
+https://catalog.data.gov/dataset/fy20-bid-trends-report-data
+
+We can utilize these datases for building a comprehensive knowledge base on business related FAQs, perfect for retrieval-based question answering.
+
+**Case Studies**
+Harvard Busines Review (HBR) has a rich repository of business case studies focusing on real-world company operations, decisions, and strategies across various industries.
+https://store.hbr.org/case-studies/?srsltid=AfmBOop1zIiE6Dmk_UX70MH1apQyBiatwiptu3UnvsY7F1DWsLG50-TI#/filter:custom_subject:Sales$2520$2526$2520Marketing
+
+CB Reports contain market trends, company case studies, and investment patterns in various industries.
+Use Case: Utilize the business case studies and trends to inform more dynamic answers around business growth, market predictions, and operational strategies.
+https://www.cbinsights.com/research/report/
+
+
+These case studies as supporting documents for answering specific business operation queries, especially for retrieval purposes.
+
+**World Bank Open Data**
+https://data.worldbank.org/topic/financial-sector (This is an example link for financial sector dataset -  downloadable in .csv, .xlsx format)
+https://data.worldbank.org/indicator/CM.MKT.LCAP.CD (This is an example link for market capitalization dataset -  downloadable in .csv, .xlsx format)
+
+These contain economic indicators, financial statistics, and business data for companies and countries worldwide.
+Use Case: Can be used for providing context and analysis on global business trends, which helps in creating background knowledge for more informed responses.
+
+
+
+
+**Other**
+https://fred.stlouisfed.org/series/ISRATIO (multiple datasets available in .xlsx, .csv on various domains including Business Operations, Finance, Marketing, Supply-chain)
+
 
 
