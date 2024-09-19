@@ -4,6 +4,9 @@
 
 Building a Business Operations Assistant driven by AI.
 
+**Objective**
+Tailoring our LLM for a specific domain while also exploring different ways to fine-tune them.
+
 **Approach:**
 
 Constructing a Retrieval Augmented Generation (RAG) pipeline integrated or powered with LLM to create an interface wherein the end user can ask business-operations related queries and get answers with relevant contextual information and supporting visualizations for data distributions. Python offers a rich set of libraries including matplotlib, seaborn, plotly which can be utilized for the sake of creating visualizations on queries by user.
