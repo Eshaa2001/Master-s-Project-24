@@ -5,6 +5,7 @@
 Building a Business Operations Assistant driven by AI.
 
 **Objective**
+
 Tailoring our LLM for a specific domain while also exploring different ways to fine-tune them.
 
 **Approach:**
