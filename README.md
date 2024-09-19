@@ -21,7 +21,19 @@ Coming onto the step of augmentation, the system will retrieve and rank relevant
 Right from feeding documents into the LLM to delivering response to the user, it's going to involve several intermediate steps. Let's assume, once the most relevant documents are retrieved from the database, they will be passed to the LLM (e.g., GPT-4). The system will ensure that these documents provide the necessary context for the LLM to generate an informed response. The LLM will then process the user's query in conjunction with the retrieved documents. It will analyze both the query and the contextual information to better understand the user's needs and the specific domain knowledge required to formulate a relevant answer.Based on the retrieved documents and the user query, the LLM will generate an accurate and contextually enriched answer. The response will be tailored to the query, providing a coherent and comprehensive output that draws directly from the most relevant business operations documents. After processing, it will generate a final response that will be delivered to the user. This answer will be both precise and contextually tailored, offering the user a well-rounded, accurate response to their business-related inquiry.
 The entire bot once ready can be hosted on streamlit so that users can have a clickable local host web url to access the interface.
 
-**Data Source:**
+**Hallucinations in LLMS**
+
+The term "Hallucination" here involves generating false or misleading information by well-trained LLMs, often due to biases in training data, leading to overconfident and
+inaccurate outputs. This overconfidence is closely linked to an overreliance on accuracyoriented training. To address these issues, it’s crucial to understand the key considerations and criteria in LLM evaluation.
+
+**Dealing with Hallucinations in LLMS**
+
+To address LLM hallucinations in the Retrieval Augmented Generation (RAG) pipeline, the system will incorporate a combination of the following practical methods that can be implemented effectively:
+1. Directly grounding answers in retrieved documents: The LLM will be instructed to generate responses only based on the retrieved content, not on any inferred or additional knowledge it might generate. This is might be an approach which limits the model’s ability to "hallucinate" facts that don’t exist in the provided documents.
+2. Answer verification with sources: The system can display retrieved documents or snippets alongside the answer. The user will have the ability to review the source, ensuring transparency.
+3. Implement confidence-based filtering where the system only delivers answers if the model is above a certain confidence level regarding the information's correctness. This can be achieved through calibrating the model and setting thresholds based on evaluation metrics like precision or recall on the training data.
+
+**Data Sources:**
 Historical Data in .csv files related to Business Operations, Finanace, Supply-chain, Marketing
 
 https://www.kaggle.com/datasets/danish1212/business-operations
