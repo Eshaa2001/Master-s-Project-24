@@ -51,8 +51,13 @@ https://quant.stackexchange.com/
 https://economics.stackexchange.com/
 https://or.stackexchange.com/
 https://quant.meta.stackexchange.com/
+
 These websites are rich sources of FAQs related to business, operations research, finance. We can generate XML files for these which can then be parsed 
+
+
 Here are some other data sources on "What do the bid trends say each Fiscal Year from 2016-20", they can be downloaded in .csv format as well.
+
+
 https://catalog.data.gov/dataset/fy16-bid-trends-report-data
 https://catalog.data.gov/dataset/fy18-bid-trends-report-data
 https://catalog.data.gov/dataset/fy19-bid-trends-report-data
@@ -62,10 +67,12 @@ We can utilize these datases for building a comprehensive knowledge base on busi
 
 **Case Studies**
 Harvard Busines Review (HBR) has a rich repository of business case studies focusing on real-world company operations, decisions, and strategies across various industries.
+
 https://store.hbr.org/case-studies/?srsltid=AfmBOop1zIiE6Dmk_UX70MH1apQyBiatwiptu3UnvsY7F1DWsLG50-TI#/filter:custom_subject:Sales$2520$2526$2520Marketing
 
 CB Reports contain market trends, company case studies, and investment patterns in various industries.
 Use Case: Utilize the business case studies and trends to inform more dynamic answers around business growth, market predictions, and operational strategies.
+
 https://www.cbinsights.com/research/report/
 
 
