@@ -48,9 +48,9 @@ Such datasets will be useful to extract trends in financial operations, business
 
 **FAQs Data**
 https://quant.stackexchange.com/
+
 https://economics.stackexchange.com/
-https://or.stackexchange.com/
-https://quant.meta.stackexchange.com/
+
 
 These websites are rich sources of FAQs related to business, operations research, finance. We can generate XML files for these which can then be parsed 
 
