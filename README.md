@@ -94,7 +94,7 @@ https://fred.stlouisfed.org/series/ISRATIO (multiple datasets available in .xlsx
 
 For question-answer pairs (like Stack Exchange Data Dump), the data usually comes in easy-to-read XML or JSON files. Each entry will have a question, its answer, and some extra details like topic **tags** or user ratings. We can organize this data into a clear structure to train models that retrieve relevant answers. This will play an integral role in training the model. 
 
-For text documents (like research papers or reports), the data might be in PDF or HTML formats. You’ll need to convert these into plain text using tools like PyPDF2 or BeautifulSoup so the system can use them for finding the right information.
+For text documents (like research papers or reports), the data might be in PDF or HTML formats. We’ll need to convert these into plain text using tools like PyPDF2 or BeautifulSoup so the system can use them for finding the right information.
 
 For structured business data, such as datasets from places like the UCI Repository, World Bank, or Yelp, these usually come in CSV files. You can use these for different types of data analysis, like forecasting or classifying information.
 
