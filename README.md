@@ -66,9 +66,6 @@ https://catalog.data.gov/dataset/fy20-bid-trends-report-data
 We can utilize these datases for building a comprehensive knowledge base on business related FAQs, perfect for retrieval-based question answering.
 
 **Case Studies**
-Harvard Busines Review (HBR) has a rich repository of business case studies focusing on real-world company operations, decisions, and strategies across various industries.
-
-https://store.hbr.org/case-studies/?srsltid=AfmBOop1zIiE6Dmk_UX70MH1apQyBiatwiptu3UnvsY7F1DWsLG50-TI#/filter:custom_subject:Sales$2520$2526$2520Marketing
 
 CB Reports contain market trends, company case studies, and investment patterns in various industries.
 Use Case: Utilize the business case studies and trends to inform more dynamic answers around business growth, market predictions, and operational strategies.
