@@ -59,7 +59,7 @@ To address LLM hallucinations in the Retrieval Augmented Generation (RAG) pipeli
 3. Implement confidence-based filtering where the system only delivers answers if the model is above a certain confidence level regarding the information's correctness. This can be achieved through calibrating the model and setting thresholds based on evaluation metrics like precision or recall on the training data.
 
 **Data Sources:**
-
+https://www.bworldonline.com/
 
 **Research Motivation**
 Following were some research papers from google scholar which were quite insightful:
