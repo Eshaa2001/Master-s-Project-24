@@ -16,7 +16,7 @@ from webdriver_manager.chrome import ChromeDriverManager
 
 # Set up Hugging Face API Token
 os.environ["HUGGINGFACEHUB_API_TOKEN"] = (
-    "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"
+    "YOUR_HUGGING_FACE_API_TOKEN"
 )
 
 # Streamlit title
