@@ -1,62 +1,71 @@
 # Master-s-Project-24
 
-**Initial Idea:**  
-
-Building a Business Operations Assistant driven by AI.
+**Project Overview**
+The Business Operations Assistant Bot is an AI-driven system designed to answer business-related queries by leveraging a fine-tuned Large Language Model (LLM) and a Retrieval-Augmented Generation (RAG) pipeline. This system combines real-time data retrieval, tailored LLM fine-tuning, and document embedding to deliver accurate, contextually enriched responses tailored to business operations topics. Built using Python, it uses various libraries, including Hugging Face Transformers for model operations, LangChain for document handling and vector storage, and Qdrant as a high-performance vector database. The bot’s Streamlit interface provides an interactive platform where users can engage with the assistant and access relevant business insights seamlessly.
 
 **Objective**
+The project aims to develop a specialized LLM tailored for the web domain, website - Business World. By fine-tuning the model and integrating real-time data retrieval, the bot is designed to deliver highly relevant responses grounded in recent, accurate business information. This approach addresses the limitations of generic LLMs by enhancing answer specificity and grounding responses in verifiable data sources.
 
-Tailoring our LLM for a specific domain while also exploring different ways to fine-tune them.
+**Approach**
 
-**Approach:**
+**How the Pipeline Works**:
+**Web Scraping and Data Collection**: The bot uses Selenium and BeautifulSoup to scrape real-time data from the “Latest News” section of a designated business website. This section provides current insights relevant to business operations, which the bot uses to create an updated knowledge base. Once scraped, the data is preprocessed for downstream tasks.
+**Embedding and Vector Storage**: To enable fast and relevant document retrieval, the bot transforms the text data into numerical vectors using a Hugging Face embedding model (**multi-qa-mpnet-base-dot-v1**). These embeddings capture semantic relationships within the text, making it easier to match user queries with relevant content. The embeddings are stored in Qdrant, a high-performance vector database, which allows efficient similarity search and retrieval.
+**Chunking and Contextual Retrieval**: Documents are divided into smaller, manageable chunks (e.g., 512 tokens) using LangChain’s text splitting tools. This chunking strategy helps the bot retrieve the most relevant sections of documents quickly and accurately, optimizing response relevance.
+This structure ensures that the bot can search through a vast knowledge base, retrieve the most pertinent information, and use it as a foundation for its answers.
 
-Constructing a Retrieval Augmented Generation (RAG) pipeline integrated or powered with LLM to create an interface wherein the end user can ask business-operations related queries and get answers with relevant contextual information and supporting visualizations for data distributions. Python offers a rich set of libraries including matplotlib, seaborn, plotly which can be utilized for the sake of creating visualizations on queries by user.
-Instead of relying solely on the LLM to generate responses, the system will retrieve the most relevant information from a pre-defined set of business documents, and the LLM will generate a contextually accurate response.The system will convert the query into a vector and search a pre-processed database of combining Wikipedia and business blogs as its knowledge base. The chatbot will be designed to efficiently retrieve relevant information and generate accurate and insightful responses to user queries, with a particular focus on improving the quality and specificity of answers within the business domain. These retrieved documents will be passed as context to the GPT model.
-GPT will process both the user query and the retrieved business documents to generate a response. For this project, a suitable Large Language Model (LLM) such as GPT-4 will be used as the foundation for generating human-like text. However, instead of relying solely on the pre-trained model, we will employ the RAG architecture to enhance the model’s ability to retrieve relevant business-related information from external sources such as Wikipedia and business blogs.
-It will utilize text embedding models to transform text data into numerical vectors. These embeddings will be stored in a vector database (FAISS) to enable fast and accurate retrieval of relevant documents during chatbot interactions. The retrieval process will involve breaking down large documents (e.g., Wikipedia articles or business blog entries) into smaller, manageable chunks. A chunking strategy (e.g., 300-500 word chunks) will be employed to ensure that the system can efficiently locate and retrieve relevant sections of these documents, maximizing response relevance.
+**2. Fine-Tuning the Language Model for Domain Relevance**
+The system uses facebook/bart-large-cnn as its foundational LLM, chosen for its capabilities in text summarization and generation. Fine-tuning this model on a curated business-specific dataset enables it to generate contextually accurate answers tailored to business queries.
 
-To effectively evaluate the performance of a RAG-based chatbot, it’s crucial to employ robust evaluation metrics that quantify both the accuracy and the quality of the generated responses. The primary goal of these metrics is to ensure that the chatbot’s output is not only factually correct but also relevant and understandable from a human perspective. Two widely recognized metrics—ROUGE and BLEU—are essential in this evaluation process, each focusing on different aspects of response quality.
-1. ROUGE (Recall-Oriented Understudy for Gisting Evaluation)
-ROUGE is a set of metrics designed to evaluate how well machine-generated summaries or responses overlap with reference answers (or "gold-standard" answers) provided by humans. It is commonly used in tasks that involve text generation, such as summarization, machine translation, and chatbot evaluations. In the context of the RAG-based chatbot, ROUGE will help assess the relevance of the chatbot’s responses.
-Key Aspects of ROUGE:
+**Dataset Curation**:
+A custom dataset was created in JSON format with (query, context, answer) triples, where:
+Query represents a typical user question.
+Context includes document excerpts or combined texts from real-world business sources.
+Answer is the ideal response tailored to the question.
+Each entry is carefully designed to capture business terminology, specific industry language, and context-relevant phrases. This structure enables the model to learn both domain-specific language patterns and the knowledge required to answer queries accurately.
+**Fine-Tuning Process**:
+Using Hugging Face’s Transformers library, the model was fine-tuned on the curated dataset to improve its response quality. By training on the (query, context, answer) pairs, the model learns to associate specific types of business questions with domain-specific contexts and answers. Training parameters, including learning rate, batch size, and number of epochs, were optimized to ensure effective learning without overfitting. The fine-tuning process produced a model that integrates well with the RAG pipeline, providing responses that align closely with business contexts.
+The fine-tuned model is integrated directly into the RAG pipeline, making use of both real-time retrieved documents and the tailored dataset for a dual advantage: up-to-date information and highly relevant, contextually accurate responses.
 
-1.1 ROUGE-N: This variant looks at the overlap of n-grams (sequences of words) between the generated and reference responses. For instance, ROUGE-1 evaluates the overlap of single words (unigrams), while ROUGE-2 looks at the overlap of two consecutive words (bigrams). Higher overlap indicates a better response, as it captures important words and phrases that should be present in a relevant answer.
+**3. Real-Time Data Integration and Document Retrieval**
+The bot dynamically pulls data from a business news website to keep its knowledge base current.
 
-1.2 ROUGE-L: This measures the longest common subsequence (LCS) between the generated response and the reference answer. It focuses on the sequential order of words, ensuring that not only are the correct words used, but that they appear in a natural, coherent order that reflects human language patterns.
+**Scraping Implementation**: Using Selenium for automation and BeautifulSoup for parsing, the bot scrapes articles from a specific section labeled “Latest News.” This section provides fresh insights and developments relevant to business, enhancing the model’s knowledge base with real-world updates. If the website’s structure changes, the bot has fallback mechanisms to locate relevant sections through alternative selectors, maintaining continuity in data access.
 
-1.3 Precision and Recall: ROUGE provides a balance between precision (how much of the generated response is relevant) and recall (how much of the relevant information from the reference answer is captured in the generated response). This balance is crucial in ensuring that the chatbot produces answers that are both informative and succinct.
+**Embedding and Storage in Qdrant**: Once scraped, each document is converted into an embedding using the multi-qa-mpnet-base-dot-v1 model. These embeddings are stored in Qdrant, which allows rapid similarity search, enabling the bot to retrieve documents relevant to any incoming query efficiently. The bot’s integration with Qdrant ensures it can quickly process a query, retrieve the top relevant documents, and supply these as context to the model.
 
-By using ROUGE, we can measure the extent to which the chatbot's generated responses align with human-generated gold-standard answers in terms of content and structure. Higher ROUGE scores imply that the chatbot is effectively capturing the key points and relevant details from its knowledge sources (Wikipedia, blogs) while maintaining a natural flow.
+This setup combines the power of real-time data with a pre-trained, fine-tuned LLM, ensuring responses are both current and grounded in factual data.
 
-2. BLEU (Bilingual Evaluation Understudy)
-BLEU is another popular metric designed to evaluate machine-generated text, particularly in translation and natural language generation tasks. BLEU measures how well the chatbot’s generated responses match human-level quality, with a focus on fluency and grammatical correctness.
+**4. Augmented Response Generation**
+The RAG architecture enables the bot to deliver responses that are both accurate and comprehensive.
 
-Key Aspects of BLEU:
+**Workflow**:
+**Query Vectorization**: The user’s query is converted into an embedding, enabling the bot to find semantically similar documents within Qdrant.
+**Document Retrieva**l: The system retrieves the top matches from the vector database, providing the most relevant context for the query.
+**LLM Contextual Generation**: Using the fine-tuned model, the bot generates a response based on both the user’s query and the retrieved document chunks. This hybrid approach allows it to provide accurate, context-aware answers that leverage real-world data without drifting into irrelevant or speculative content.
+This augmentation step bridges the gap between static model knowledge and dynamic, real-world information, allowing the bot to remain relevant and informative in a rapidly changing domain.
 
-2.1 N-gram Matching: Similar to ROUGE, BLEU also evaluates the overlap of n-grams between the generated and reference answers. However, BLEU places greater emphasis on how well these n-grams match, rewarding both precision (the correct use of phrases) and fluency (natural, human-like sentence structure).
+**5. Managing Hallucinations and Ensuring Response Accuracy**
+To address potential hallucinations—situations where the model might generate inaccurate or overly confident responses—the bot incorporates several safeguards:
 
-2.2 Weighted N-grams: BLEU scores are calculated by comparing not just single words, but also longer sequences of words (e.g., bigrams, trigrams). This is important for ensuring that the generated text follows logical and grammatical patterns, rather than just using the right keywords. BLEU will penalize the chatbot for missing key multi-word expressions, resulting in a lower score if the response is disjointed or lacks coherence.
+**Grounded Responses**: The model is instructed to generate responses based strictly on retrieved documents, minimizing reliance on inferred knowledge.
+**Source Verification**: The retrieved context or snippets are displayed alongside the generated answer, giving users transparency into the data source and an opportunity to verify the response.
+**Confidence Thresholds**: By calibrating response generation with metrics such as ROUGE and BLEU, the bot ensures that responses meet a predefined accuracy threshold before being presented to users.
+This setup helps mitigate risks associated with model hallucinations, particularly important in a business context where factual accuracy is critical.
 
-2.3 Brevity Penalty: BLEU includes a brevity penalty, which discourages the chatbot from generating overly short answers that omit essential details. This ensures that responses are sufficiently detailed while still being concise.
+**6. Evaluation Metrics: ROUGE and BLEU**
+To assess the model’s performance, the bot employs two evaluation metrics:
+**ROUGE**: Evaluates how well the generated responses overlap with reference answers by focusing on n-gram and longest common subsequence matching. ROUGE provides insights into both precision and recall, ensuring responses are relevant and contain essential details.
+**BLEU**: Measures the fluency and linguistic quality of responses. By assessing n-gram accuracy, BLEU helps ensure that the generated answers are not only factually correct but also grammatically sound and coherent.
+Using these metrics allows for a comprehensive evaluation of both the accuracy and readability of the bot’s responses.
 
-By using BLEU, we can assess the linguistic quality of the chatbot’s answers, ensuring they are not only factually accurate but also sound natural and are grammatically correct. BLEU, when combined with ROUGE, provides a comprehensive evaluation of both the relevance of content (ROUGE) and the fluency or quality of the language used (BLEU).
+**7. User Interaction Through Streamlit Interface**
+The bot is accessible through a Streamlit interface where users can input their queries and receive real-time, informed answers. The interface includes:
 
-
-Coming onto the step of augmentation, the system will retrieve and rank relevant documents, such as articles or reports about supply chain optimization, to provide relevant context. 
-Right from feeding documents into the LLM to delivering response to the user, it's going to involve several intermediate steps. Let's assume, once the most relevant documents are retrieved from the database, they will be passed to the LLM (e.g., GPT-4). The system will ensure that these documents provide the necessary context for the LLM to generate an informed response. The LLM will then process the user's query in conjunction with the retrieved documents. It will analyze both the query and the contextual information to better understand the user's needs and the specific domain knowledge required to formulate a relevant answer.Based on the retrieved documents and the user query, the LLM will generate an accurate and contextually enriched answer. The response will be tailored to the query, providing a coherent and comprehensive output that draws directly from the most relevant business operations documents. After processing, it will generate a final response that will be delivered to the user. This answer will be both precise and contextually tailored, offering the user a well-rounded, accurate response to their business-related inquiry.
-The entire bot once ready can be hosted on streamlit so that users can have a clickable local host web url to access the interface.
-
-**Hallucinations in LLMS**
-
-The term "Hallucination" here involves generating false or misleading information by well-trained LLMs, often due to biases in training data, leading to overconfident and
-inaccurate outputs. This overconfidence is closely linked to an overreliance on accuracyoriented training. To address these issues, it’s crucial to understand the key considerations and criteria in LLM evaluation.
-
-**Dealing with Hallucinations in LLMS**
-
-To address LLM hallucinations in the Retrieval Augmented Generation (RAG) pipeline, the system will incorporate a combination of the following practical methods that can be implemented effectively:
-1. Directly grounding answers in retrieved documents: The LLM will be instructed to generate responses only based on the retrieved content, not on any inferred or additional knowledge it might generate. This is might be an approach which limits the model’s ability to "hallucinate" facts that don’t exist in the provided documents.
-2. Answer verification with sources: The system can display retrieved documents or snippets alongside the answer. The user will have the ability to review the source, ensuring transparency.
-3. Implement confidence-based filtering where the system only delivers answers if the model is above a certain confidence level regarding the information's correctness. This can be achieved through calibrating the model and setting thresholds based on evaluation metrics like precision or recall on the training data.
+**URL Input Field**: Allows users to enter the URL of a specific section or site for data scraping.
+**Query Field**: Enables users to type in specific business questions.
+**Answer Display**: Presents the generated answer along with supporting context from retrieved documents, ensuring transparency.
+Streamlit provides a clean, interactive UI, making it easy for users to engage with the bot and access its capabilities directly.
 
 **Data Sources:**
 https://www.bworldonline.com/
