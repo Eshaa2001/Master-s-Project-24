@@ -1,4 +1,4 @@
-# Master-s-Project-24
+# Capstone'24
 
 **Project Overview**
 The Business Operations Assistant Bot is an AI-driven system designed to answer business-related queries by leveraging a fine-tuned Large Language Model (LLM) and a Retrieval-Augmented Generation (RAG) pipeline. This system combines real-time data retrieval, tailored LLM fine-tuning, and document embedding to deliver accurate, contextually enriched responses tailored to business operations topics. Built using Python, it uses various libraries, including Hugging Face Transformers for model operations, LangChain for document handling and vector storage, and Qdrant as a high-performance vector database. The bot’s Streamlit interface provides an interactive platform where users can engage with the assistant and access relevant business insights seamlessly.
