@@ -40,8 +40,11 @@ This setup combines the power of real-time data with a pre-trained, fine-tuned L
 The RAG architecture enables the bot to deliver responses that are both accurate and comprehensive.
 
 **Workflow**:
+
 **Query Vectorization**: The user’s query is converted into an embedding, enabling the bot to find semantically similar documents within Qdrant.
-**Document Retrieva**l: The system retrieves the top matches from the vector database, providing the most relevant context for the query.
+
+**Document Retrieval**: The system retrieves the top matches from the vector database, providing the most relevant context for the query.
+
 **LLM Contextual Generation**: Using the fine-tuned model, the bot generates a response based on both the user’s query and the retrieved document chunks. This hybrid approach allows it to provide accurate, context-aware answers that leverage real-world data without drifting into irrelevant or speculative content.
 This augmentation step bridges the gap between static model knowledge and dynamic, real-world information, allowing the bot to remain relevant and informative in a rapidly changing domain.
 
@@ -49,7 +52,9 @@ This augmentation step bridges the gap between static model knowledge and dynami
 To address potential hallucinations—situations where the model might generate inaccurate or overly confident responses—the bot incorporates several safeguards:
 
 **Grounded Responses**: The model is instructed to generate responses based strictly on retrieved documents, minimizing reliance on inferred knowledge.
+
 **Source Verification**: The retrieved context or snippets are displayed alongside the generated answer, giving users transparency into the data source and an opportunity to verify the response.
+
 **Confidence Thresholds**: By calibrating response generation with metrics such as ROUGE and BLEU, the bot ensures that responses meet a predefined accuracy threshold before being presented to users.
 This setup helps mitigate risks associated with model hallucinations, particularly important in a business context where factual accuracy is critical.
 
@@ -63,7 +68,9 @@ Using these metrics allows for a comprehensive evaluation of both the accuracy a
 The bot is accessible through a Streamlit interface where users can input their queries and receive real-time, informed answers. The interface includes:
 
 **URL Input Field**: Allows users to enter the URL of a specific section or site for data scraping.
+
 **Query Field**: Enables users to type in specific business questions.
+
 **Answer Display**: Presents the generated answer along with supporting context from retrieved documents, ensuring transparency.
 Streamlit provides a clean, interactive UI, making it easy for users to engage with the bot and access its capabilities directly.
 
