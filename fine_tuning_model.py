@@ -1,4 +1,3 @@
-
 import json
 
 from datasets import Dataset
@@ -10,7 +9,7 @@ from transformers import (
 )
 
 # Loading the curated dataset
-with open("Data/fine_tuning_d1.json", "r") as f:
+with open("fine_tuning_d1.json", "r") as f:
     file_content = f.read()
     data = json.loads(file_content)
 
@@ -57,12 +56,13 @@ model = BartForConditionalGeneration.from_pretrained("facebook/bart-large-cnn")
 
 # Training arguments
 training_args = TrainingArguments(
-    output_dir="./fine_tuned_model",
+    output_dir="./fine_tuned_model1",
     evaluation_strategy="epoch",
     learning_rate=2e-5,
     per_device_train_batch_size=2,
     num_train_epochs=3,
     weight_decay=0.01,
+    save_strategy="no",
 )
 
 # Initializing Trainer
@@ -82,3 +82,8 @@ trainer = Trainer(
 
 # Fine-tuning the model
 trainer.train()
+
+# Save the final model and tokenizer for later use
+final_model_path = "./fine_tuned_model1/final_checkpoint"
+trainer.save_model(final_model_path)  # Save model
+tokenizer.save_pretrained(final_model_path)  # Save tokenizer
