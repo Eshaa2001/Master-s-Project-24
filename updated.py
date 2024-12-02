@@ -1,9 +1,9 @@
-import json
 import logging
 import os
 import time
 
 import numpy as np
+import requests
 import streamlit as st
 from bs4 import BeautifulSoup
 from langchain_community.document_loaders import WebBaseLoader
@@ -16,19 +16,16 @@ from sklearn.metrics.pairwise import cosine_similarity
 from transformers import BartForConditionalGeneration, BartTokenizer
 from webdriver_manager.chrome import ChromeDriverManager
 
-ask = "What was the status of the Philippines' external debt payment at the end of August?"
-ask2 = "Why is the Philippines cautious about shifts in US foreign policy?"
-
 # Set up Hugging Face API Token
 os.environ["HUGGINGFACEHUB_API_TOKEN"] = (
-    "MY_API_TOKEN"
+    "YOUR_HUGGINGFACE_API_TOKEN"
 )
 
 # Streamlit title for the web app
 st.title("Business World Bot")
 
-# Load the fine-tuned model and tokenizer
-fine_tuned_model_path = "./fine_tuned_model1/final_checkpoint"
+# Load the fine-tuned model and tokenizer for answer generation
+fine_tuned_model_path = "./fine_tuned_model4/final_checkpoint"
 tokenizer_fine_tuned = BartTokenizer.from_pretrained(
     fine_tuned_model_path, local_files_only=True
 )
@@ -36,223 +33,257 @@ fine_tuned_model1 = BartForConditionalGeneration.from_pretrained(
     fine_tuned_model_path
 )
 
-# Load the original BART model for summarization
+# Load the original BART model for summarizing real-time data
 tokenizer_bart = BartTokenizer.from_pretrained("facebook/bart-large-cnn")
 bart_model = BartForConditionalGeneration.from_pretrained(
     "facebook/bart-large-cnn"
 )
 
-# Initialize HuggingFace Embedding Model
+# Initialize HuggingFace Embedding Model for embedding
 embedding_model = "multi-qa-mpnet-base-dot-v1"
 base_embeddings = HuggingFaceEmbeddings(model_name=embedding_model)
 
+# Initialize session state variables if they don't exist
+if "is_scraped" not in st.session_state:
+    st.session_state.is_scraped = False
+    st.session_state.vectorstore = None
+    st.session_state.retrieved_documents = []
+    st.session_state.chat_history = []  # Stores the conversation history
 
+
+# Function to scrape the website
 def scrape_website(url):
     """
-    Scrapes the specified URL using Selenium and extracts content and source URLs.
+    Scrape the content and sub-links from a specific section of a webpage.
 
     Args:
-        url (str): The URL of the website to scrape.
+        url (str): The URL of the webpage to scrape.
 
     Returns:
-        list: A list of lists, each containing [content, source URL].
+        tuple: A tuple containing:
+            - content (str or None): The text content of the target `<div>` section, or `None` if not found.
+            - sub_links (list): A list of URLs found within the target `<div>`.
     """
+
     try:
+        options = webdriver.ChromeOptions()
+        options.add_argument("--headless")  # Run in headless mode
+        # options.add_argument("--disable-gpu")  # Disable GPU acceleration
+        # options.add_argument("--no-sandbox")  # Avoid sandboxing for better compatibility
+        # options.add_argument("--disable-dev-shm-usage")  # Handle large data in shared memory
+        options.add_argument("--window-size=1920,1080")
         driver = webdriver.Chrome(
-            service=Service(ChromeDriverManager().install())
+            service=Service(ChromeDriverManager().install()), options=options
         )
         driver.get(url)
         time.sleep(5)
-
         html = driver.page_source
         soup = BeautifulSoup(html, "html.parser")
         target_div = soup.find(
             "div",
             class_="td_block_wrap td_block_9 tdi_40 td-pb-border-top td_block_template_1",
         )
-
         if not target_div:
             logging.warning(f"Target div not found on the page: {url}")
             driver.quit()
-            return []
-
-        articles = []
-        for link in target_div.find_all("a", href=True):
-            if link["href"].startswith("http"):
-                article_url = link["href"]
-                driver.get(article_url)
-                time.sleep(3)
-                article_html = driver.page_source
-                article_soup = BeautifulSoup(article_html, "html.parser")
-                article_content = article_soup.get_text(separator=" ")
-                articles.append([article_content, article_url])
-
+            return None, []
+        sub_links = [
+            link["href"]
+            for link in target_div.find_all("a", href=True)
+            if link["href"].startswith("http")
+        ]
+        content = target_div.get_text(separator=" ")
         driver.quit()
-        return articles
-
+        return content, sub_links
     except Exception as e:
         logging.error(f"Error scraping {url}: {e}")
-        return []
+        return None, []
 
 
-def summarize_contexts(articles):
+def validate_url(url):
     """
-    Summarizes a list of articles using the BART model.
+    Validates the URL by sending a HEAD request.
+    Args:
+        url (str): The URL to validate.
+    Returns:
+        bool: True if the URL is valid and accessible, False otherwise.
+    """
+    try:
+        response = requests.head(url, allow_redirects=True, timeout=5)
+        if response.status_code == 200:
+            return url
+    except requests.RequestException:
+        return False
+
+
+# Summarize function
+def summarize_context(context):
+    """
+    Generate a summary for the given text using a BART model.
 
     Args:
-        articles (list): A list of lists, each containing [content, source URL].
+        context (str): The input text to summarize.
 
     Returns:
-        list: A list of lists, each containing [summarized content, source URL].
+        str: A summarized version of the input text.
     """
-    summarized_articles = []
-    for article in articles:
-        content, source = article
-        inputs = tokenizer_bart(
-            content, return_tensors="pt", max_length=512, truncation=True
-        )
-        summary_ids = bart_model.generate(
-            inputs["input_ids"],
-            max_length=100,
-            min_length=30,
-            length_penalty=2.0,
-        )
-        summarized_content = tokenizer_bart.decode(
-            summary_ids[0], skip_special_tokens=True
-        )
-        summarized_articles.append([summarized_content, source])
-    return summarized_articles
+
+    inputs = tokenizer_bart(
+        context, return_tensors="pt", max_length=512, truncation=True
+    )
+    summary_ids = bart_model.generate(
+        inputs["input_ids"],
+        max_length=150,
+        min_length=50,
+        length_penalty=2.0,
+        no_repeat_ngram_size=2,
+    )
+    return tokenizer_bart.decode(summary_ids[0], skip_special_tokens=True)
 
 
+# Generate initial answer
+def generate_initial_answer(query):
+    """
+    Generate an initial answer to a given query using a fine-tuned language model.
+
+    Args:
+        query (str): The input query or question to process.
+
+    Returns:
+        str: The generated response based on the fine-tuned model.
+    """
+
+    input_text = f"Query: {query} Context:"
+    inputs = tokenizer_fine_tuned(
+        input_text, return_tensors="pt", max_length=1024, truncation=True
+    )
+    output_ids = fine_tuned_model1.generate(
+        inputs["input_ids"], max_new_tokens=300, length_penalty=1.2
+    )
+    response = tokenizer_fine_tuned.decode(
+        output_ids[0], skip_special_tokens=True
+    )
+    return response
+
+
+# Check if answer is relevant
 def is_relevant_answer(query, response, threshold=0.7):
     """
-    Checks the relevance of a generated response to a query using cosine similarity.
+    Determine if a generated response is relevant to a given query based on cosine similarity.
 
     Args:
-        query (str): User query.
-        response (str): Generated response.
-        threshold (float): Cosine similarity threshold for relevance.
+        query (str): The input query.
+        response (str): The generated response to evaluate.
+        threshold (float, optional): The similarity score threshold for relevance. Defaults to 0.7.
 
     Returns:
-        bool: True if the response is relevant, False otherwise.
+        bool: True if the similarity score is greater than or equal to the threshold, False otherwise.
     """
-    query_embedding = np.array(base_embeddings.embed_query(query))
-    response_embedding = np.array(base_embeddings.embed_query(response))
-    query_embedding = query_embedding.reshape(1, -1)
-    response_embedding = response_embedding.reshape(1, -1)
 
+    query_embedding = np.array(base_embeddings.embed_query(query)).reshape(
+        1, -1
+    )
+    response_embedding = np.array(
+        base_embeddings.embed_query(response)
+    ).reshape(1, -1)
     similarity_score = cosine_similarity(query_embedding, response_embedding)[
         0
     ][0]
     return similarity_score >= threshold
 
 
-def generate_initial_answer(query):
-    """
-    Generates an initial answer using the fine-tuned model.
-
-    Args:
-        query (str): User query.
-
-    Returns:
-        str: Generated answer.
-    """
-    input_text = f"Query: {query} Context:"
-    inputs = tokenizer_fine_tuned(
-        input_text, return_tensors="pt", max_length=512, truncation=True
-    )
-    output_ids = fine_tuned_model1.generate(
-        inputs["input_ids"], max_new_tokens=100
-    )
-    return tokenizer_fine_tuned.decode(output_ids[0], skip_special_tokens=True)
-
-
+# Generate answer with fallback
 def generate_answer_with_fallback(query, retriever):
     """
-    Generates an answer using the fine-tuned model with a fallback to contextual generation if needed.
+    Generate an answer to a query using a retrieval-based approach with a fallback mechanism.
 
     Args:
-        query (str): User query.
-        retriever: Retriever object for fetching relevant documents.
+        query (str): The input query to answer.
+        retriever (object): The retriever object used to fetch relevant documents.
 
     Returns:
-        str: Generated answer with cited sources.
+        str: The generated answer, with source information if available, or an error message if no relevant answer is found.
     """
-    # Step 1: Retrieve relevant documents
+
     retrieved_docs = retriever.get_relevant_documents(query)
-
-    # Use the most relevant retrieved document for context
     most_relevant_doc = retrieved_docs[0]
-
-    context = most_relevant_doc.page_content  # Access content using attribute
+    context = most_relevant_doc.page_content
     if not is_relevant_answer(query, context):
-        # If no relevant documents are found, generate an answer from the fine-tuned model
         initial_answer = generate_initial_answer(query)
         if is_relevant_answer(query, initial_answer):
-            return f"{initial_answer}\n\nSource: Answer derived from fine-tuned knowledge base."
-        # return f"{initial_answer}\n\nSource: Answer derived from fine-tuned knowledge base."
-        return "I'm sorry, I couldn't find a relevant answer to your query."
+            answer, source = initial_answer.split("Source: ", 1)
+            if validate_url(source):
+                return f"{answer}\n\nSource: {source}"
+        return "Could not find relevant answer"
+    # Use the most relevant retrieved document for context
+    source = most_relevant_doc.metadata.get("source", "Unknown Source")
 
-    source = most_relevant_doc.metadata.get(
-        "source", "Unknown Source"
-    )  # Access metadata using .metadata
-
-    # Step 2: Generate the answer using the retrieved context
+    # Generate the answer using the retrieved context
     input_text = f"Context: {context} Query: {query}"
     inputs = tokenizer_fine_tuned(
-        input_text, return_tensors="pt", max_length=512, truncation=True
+        input_text, return_tensors="pt", max_length=1024, truncation=True
     )
     output_ids = fine_tuned_model1.generate(
-        inputs["input_ids"], max_new_tokens=100
+        inputs["input_ids"], max_new_tokens=300, length_penalty=1.2
     )
     response = tokenizer_fine_tuned.decode(
         output_ids[0], skip_special_tokens=True
     )
+    answer, _ = response.split("Source: ", 1)
+    if validate_url(source):
+        return f"{answer}\n\nSource: {source}"
+    return answer, context
 
-    return f"{response}\n\nSource: {source}"
 
+# Streamlit user inputs
+url = "https://www.bworldonline.com/"
+query_input = st.text_area(
+    "Enter your query"
+)  # Text area allows for multi-line input
+send_button = st.button("Send")
 
-# Streamlit Input and Query Handling
-url_input = st.text_input(
-    "Enter URL to scrape data from", "https://www.bworldonline.com/"
-)
-query_input = st.text_input("Enter your query")
-scrape_button = st.button("Scrape and Query")
+# Display conversation history
+st.write("**Conversation History:**")
+for i, (user_message, bot_response) in enumerate(
+    st.session_state.chat_history
+):
+    st.write(f"**User:** {user_message}")
+    st.write(f"{bot_response}")
 
-if scrape_button:
-    with st.spinner("Scraping website and processing data..."):
-        # Step 1: Scrape the website
-        articles = scrape_website(url_input)
+# When the user submits a message
+if send_button and query_input.strip():
+    with st.spinner("Processing..."):
+        if not st.session_state.is_scraped:
+            # Scrape website and summarize
+            content, sub_links = scrape_website(url)
+            if content:
+                loader = WebBaseLoader(web_paths=sub_links, bs_kwargs=None)
+                documents = loader.load()
+                summarized_docs = [
+                    summarize_context(doc.to_json()["kwargs"]["page_content"])
+                    for doc in documents
+                ]
+                text_splitter = RecursiveCharacterTextSplitter(
+                    chunk_size=512, chunk_overlap=50
+                )
+                splits = text_splitter.split_documents(documents)
+                vectorstore = Qdrant.from_documents(
+                    splits,
+                    embedding=base_embeddings,
+                    collection_name="document_collection",
+                    location=":memory:",
+                )
+                st.session_state.vectorstore = vectorstore
+                st.session_state.retrieved_documents = splits
+                st.session_state.is_scraped = True
+                st.success("Data scraped and stored successfully!")
 
-        if articles:
-            # Step 2: Summarize the scraped articles
-            summarized_articles = summarize_contexts(articles)
+        # Set up retriever and answer query using conversational memory
+        retriever = st.session_state.vectorstore.as_retriever()
+        answer = generate_answer_with_fallback(query_input, retriever)
 
-            # Step 3: Split and add to vector store
-            text_splitter = RecursiveCharacterTextSplitter(
-                chunk_size=512, chunk_overlap=50
-            )
-            splits = []
-            for summarized_article in summarized_articles:
-                summarized_content, source = summarized_article
-                chunks = text_splitter.split_text(summarized_content)
-                for chunk in chunks:
-                    splits.append([chunk, source])
-            # print(splits)
-            vectorstore = Qdrant.from_texts(
-                texts=[split[0] for split in splits],
-                metadatas=[{"source": split[1]} for split in splits],
-                embedding=base_embeddings,
-                collection_name="document_collection",
-                location=":memory:",
-            )
-            st.success(
-                "Data scraped, summarized, and added to the vector store!"
-            )
+        # Add the current query and response to the chat history
+        st.session_state.chat_history.append((query_input, answer))
 
-        if query_input:
-            # Step 4: Generate answer with fallback
-            retriever = vectorstore.as_retriever()
-            answer = generate_answer_with_fallback(query_input, retriever)
-            st.write("Generated Answer:")
-            st.write(answer)
+        # Clear the input field after sending the message
+        st.rerun()
