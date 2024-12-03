@@ -9,7 +9,7 @@ from transformers import (
 )
 
 # Loading the curated dataset
-with open("fine_tuning_d1.json", "r") as f:
+with open("fine_tuning_d3.json", "r") as f:
     file_content = f.read()
     data = json.loads(file_content)
 
@@ -18,7 +18,8 @@ with open("fine_tuning_d1.json", "r") as f:
 train_data = [
     {
         "input_text": f"Context: {item['context']} Query: {item['query']}",
-        "target_text": item["answer"],
+        # "target_text": item["answer"],
+        "target_text": f"Answer: {item['answer']} Source: {item['source']}",
     }
     for item in data
 ]
@@ -35,13 +36,13 @@ def tokenize(batch):
         batch["input_text"],
         padding="max_length",
         truncation=True,
-        max_length=512,
+        max_length=1024,
     )
     labels = tokenizer(
         batch["target_text"],
         padding="max_length",
         truncation=True,
-        max_length=100,
+        max_length=300,
     )
     inputs["labels"] = labels["input_ids"]
     return inputs
@@ -56,11 +57,11 @@ model = BartForConditionalGeneration.from_pretrained("facebook/bart-large-cnn")
 
 # Training arguments
 training_args = TrainingArguments(
-    output_dir="./fine_tuned_model1",
+    output_dir="./fine_tuned_model3",
     evaluation_strategy="epoch",
-    learning_rate=2e-5,
-    per_device_train_batch_size=2,
-    num_train_epochs=3,
+    learning_rate=5e-5,
+    per_device_train_batch_size=10,
+    num_train_epochs=30,
     weight_decay=0.01,
     save_strategy="no",
 )
@@ -84,6 +85,6 @@ trainer = Trainer(
 trainer.train()
 
 # Save the final model and tokenizer for later use
-final_model_path = "./fine_tuned_model1/final_checkpoint"
+final_model_path = "./fine_tuned_model3/final_checkpoint"
 trainer.save_model(final_model_path)  # Save model
 tokenizer.save_pretrained(final_model_path)  # Save tokenizer
