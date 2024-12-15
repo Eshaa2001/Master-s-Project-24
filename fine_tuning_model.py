@@ -9,7 +9,7 @@ from transformers import (
 )
 
 # Loading the curated dataset
-with open("fine_tuning_d3.json", "r") as f:
+with open("dataset.json", "r") as f:
     file_content = f.read()
     data = json.loads(file_content)
 
