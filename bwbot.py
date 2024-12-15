@@ -39,7 +39,7 @@ class BusinessWorldBot:
         """Initialize the required models and embeddings with proper error handling."""
         try:
             # Fine-tuned model for answer generation
-            fine_tuned_model_path = "C:/Users/eshaa/OneDrive/Documents/MFP/fine_tuned_model4/fine_tuned_model4/final_checkpoint"
+            fine_tuned_model_path = "C:/MFP/fine_tuned_model/fine_tuned_model/final_checkpoint"
             self.tokenizer_fine_tuned = BartTokenizer.from_pretrained(
                 fine_tuned_model_path, local_files_only=True
             )
@@ -282,13 +282,3 @@ class BusinessWorldBot:
                 # Update chat history
                 st.session_state.chat_history.append((query_input, answer))
                 st.rerun()
-
-
-def main():
-    """Initialize and run the bot."""
-    bot = BusinessWorldBot()
-    bot.run()
-
-
-if __name__ == "__main__":
-    main()
