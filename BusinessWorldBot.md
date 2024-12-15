@@ -18,13 +18,20 @@ This structure ensures that the bot can search through a vast knowledge base, re
 The system uses facebook/bart-large-cnn as its foundational LLM, chosen for its capabilities in text summarization and generation. Fine-tuning this model on a curated business-specific dataset enables it to generate contextually accurate answers tailored to business queries.
 
 **Dataset Curation**:
-A custom dataset was created in JSON format with (query, context, answer) triples, where:
+A custom dataset was created in JSON format with (query, context, answer,source) triples, where:
 Query represents a typical user question.
 Context includes document excerpts or combined texts from real-world business sources.
 Answer is the ideal response tailored to the question.
+Source is for URL citation of the article from where the answer to query is generated.
 Each entry is carefully designed to capture business terminology, specific industry language, and context-relevant phrases. This structure enables the model to learn both domain-specific language patterns and the knowledge required to answer queries accurately.
 **Fine-Tuning Process**:
-Using Hugging Face’s Transformers library, the model was fine-tuned on the curated dataset to improve its response quality. By training on the (query, context, answer) pairs, the model learns to associate specific types of business questions with domain-specific contexts and answers. Training parameters, including learning rate, batch size, and number of epochs, were optimized to ensure effective learning without overfitting. The fine-tuning process produced a model that integrates well with the RAG pipeline, providing responses that align closely with business contexts.
+Using Hugging Face’s Transformers library, the model was fine-tuned on the curated dataset to improve its response quality. By training on the (query, context, answer,source) pairs, the model learns to associate specific types of business questions with domain-specific contexts and answers. Training parameters, including learning rate, batch size, and number of epochs, were optimized to ensure effective learning without overfitting. 
+In this case, 
+**learning_rate=5e-5**,
+**per_device_train_batch_size=10**,
+**num_train_epochs=30**,
+**weight_decay=0.01**
+The fine-tuning process produced a model that integrates well with the RAG pipeline, providing responses that align closely with business contexts.
 The fine-tuned model is integrated directly into the RAG pipeline, making use of both real-time retrieved documents and the tailored dataset for a dual advantage: up-to-date information and highly relevant, contextually accurate responses.
 
 **3. Real-Time Data Integration and Document Retrieval**
@@ -32,7 +39,7 @@ The bot dynamically pulls data from a business news website to keep its knowledg
 
 **Scraping Implementation**: Using Selenium for automation and BeautifulSoup for parsing, the bot scrapes articles from a specific section labeled “Latest News.” This section provides fresh insights and developments relevant to business, enhancing the model’s knowledge base with real-world updates. If the website’s structure changes, the bot has fallback mechanisms to locate relevant sections through alternative selectors, maintaining continuity in data access.
 
-**Embedding and Storage in Qdrant**: Once scraped, each document is converted into an embedding using the multi-qa-mpnet-base-dot-v1 model. These embeddings are stored in Qdrant, which allows rapid similarity search, enabling the bot to retrieve documents relevant to any incoming query efficiently. The bot’s integration with Qdrant ensures it can quickly process a query, retrieve the top relevant documents, and supply these as context to the model.
+**Embedding and Storage in Qdrant**: Once scraped, each document is converted into an embedding using the **multi-qa-mpnet-base-dot-v1** model. These embeddings are stored in Qdrant, which allows rapid similarity search, enabling the bot to retrieve documents relevant to any incoming query efficiently. The bot’s integration with Qdrant ensures it can quickly process a query, retrieve the top relevant documents, and supply these as context to the model.
 
 This setup combines the power of real-time data with a pre-trained, fine-tuned LLM, ensuring responses are both current and grounded in factual data.
 
@@ -83,14 +90,3 @@ Streamlit provides a clean, interactive UI, making it easy for users to engage w
 
 **Data Sources:**
 https://www.bworldonline.com/
-
-**Research Motivation**
-Following were some research papers from google scholar which were quite insightful:
-1. https://www.researchgate.net/profile/Reshmi-Sankar/publication/323451431_EMPOWERING_CHATBOTS_WITH_BUSINESS_INTELLIGENCE_BY_BIG_DATA_INTEGRATION/links/5b9351b4299bf14739257a86/EMPOWERING-CHATBOTS-WITH-BUSINESS-INTELLIGENCE-BY-BIG-DATA-INTEGRATION.pdf
-2. https://ieeexplore.ieee.org/abstract/document/9500127
-3. https://dl.acm.org/doi/abs/10.1145/3640794.3665538?casa_token=pv4OYavJppUAAAAA:p-RlA7CnS3fhXRSkI8na57Lh2jI178MNCQtJtUbdkPhqEWJXX5fRVFzXgB0gkTYwn1gF_gR-IQwGgw
-4. https://arxiv.org/abs/2406.16937
-5. https://github.com/Revanth980727/DataAnalysis-Chatbot
-
-
-
