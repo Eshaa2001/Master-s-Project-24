@@ -19,7 +19,7 @@ from transformers import BartForConditionalGeneration, BartTokenizer
 from webdriver_manager.chrome import ChromeDriverManager
 
 # Configuration Constants
-HUGGING_FACE_TOKEN = "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"
+HUGGING_FACE_TOKEN = "YOUR_HUGGING_FACE_TOKEN"
 EMBEDDING_MODEL = "multi-qa-mpnet-base-dot-v1"
 WEBSITE_URL = "https://www.bworldonline.com/"
 SCRAPE_TIMEOUT = 5
@@ -39,7 +39,7 @@ class BusinessWorldBot:
         """Initialize the required models and embeddings with proper error handling."""
         try:
             # Fine-tuned model for answer generation
-            fine_tuned_model_path = "C:/MFP/fine_tuned_model/fine_tuned_model/final_checkpoint"
+            fine_tuned_model_path = "./fine_tuned_model/final_checkpoint"
             self.tokenizer_fine_tuned = BartTokenizer.from_pretrained(
                 fine_tuned_model_path, local_files_only=True
             )
